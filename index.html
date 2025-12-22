@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainability in the Operating Room Survey</title>
+    <style>
+        :root {
+            --color-white: rgba(255, 255, 255, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-red-400: rgba(255, 84, 89, 1);
+            --color-orange-500: rgba(168, 75, 47, 1);
+            
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-border: rgba(94, 82, 64, 0.2);
+            --color-focus-ring: rgba(33, 128, 141, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 14px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.5;
+            color: var(--color-text);
+            background-color: var(--color-background);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 {
+            margin: 0;
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
+        }
+
+        h1 { font-size: 30px; }
+        h2 { font-size: 24px; }
+        h3 { font-size: 18px; }
+
+        p { margin: 0 0 16px 0; }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .header h1 {
+            margin-bottom: 8px;
+            color: var(--color-teal-500);
+        }
+
+        .header p {
+            font-size: 16px;
+            color: var(--color-text-secondary);
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 250ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn--primary {
+            background: var(--color-primary);
+            color: var(--color-white);
+        }
+
+        .btn--primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn--secondary {
+            background: rgba(94, 82, 64, 0.12);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn--secondary:hover {
+            background: rgba(94, 82, 64, 0.2);
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .card {
+            background-color: var(--color-surface);
+            border-radius: 12px;
+            border: 1px solid var(--color-border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        .card__body {
+            padding: 32px;
+        }
+
+        .survey-view {
+            display: none;
+        }
+
+        .survey-view.active {
+            display: block;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--color-gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .progress-bar__fill {
+            height: 100%;
+            background: var(--color-primary);
+            transition: width 300ms ease;
+        }
+
+        .section-header {
+            margin-bottom: 32px;
+        }
+
+        .section-header h2 {
+            margin-bottom: 8px;
+        }
+
+        .section-header p {
+            color: var(--color-text-secondary);
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-label--required::after {
+            content: " *";
+            color: var(--color-red-400);
+        }
+
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--color-text);
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-option, .checkbox-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            cursor: pointer;
+            transition: all 250ms ease;
+        }
+
+        .radio-option:hover, .checkbox-option:hover {
+            background: rgba(33, 128, 141, 0.05);
+            border-color: var(--color-primary);
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--color-primary);
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 250ms ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-focus-ring);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .navigation .btn {
+            flex: 1;
+        }
+
+        .error-message {
+            color: var(--color-red-400);
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .thank-you {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .thank-you h2 {
+            color: var(--color-primary);
+            margin-bottom: 16px;
+        }
+
+        .thank-you p {
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        /* Admin Dashboard */
+        .admin-view {
+            display: none;
+        }
+
+        .admin-view.active {
+            display: block;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-card__value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .stat-card__label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+        }
+
+        .responses-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+            font-size: 13px;
+        }
+
+        .responses-table th {
+            background: var(--color-gray-200);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .responses-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .responses-table tr:hover {
+            background: rgba(33, 128, 141, 0.03);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .helper-text {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 6px;
+        }
+
+        .section-counter {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .card__body {
+                padding: 24px;
+            }
+
+            h1 { font-size: 24px; }
+            h2 { font-size: 20px; }
+
+            .navigation {
+                flex-direction: column;
+            }
+
+            .navigation .btn {
+                width: 100%;
+            }
+
+            .admin-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>OR Sustainability Survey</h1>
+            <p>Micro-habits and Practices in the Operating Room</p>
+        </div>
+
+        <div class="mode-toggle">
+            <button class="btn btn--primary" id="surveyModeBtn" onclick="switchMode('survey')">Survey</button>
+            <button class="btn btn--secondary" id="adminModeBtn" onclick="switchMode('admin')">Admin Dashboard</button>
+        </div>
+
+        <!-- Survey View -->
+        <div id="surveyView" class="survey-view active">
+            <div class="card">
+                <div class="card__body">
+                    <div class="progress-bar">
+                        <div class="progress-bar__fill" id="progressFill"></div>
+                    </div>
+
+                    <div class="section-header">
+                        <div class="section-counter">Section <span id="sectionNum">1</span> of 6</div>
+                        <h2 id="sectionTitle">Demographics</h2>
+                        <p id="sectionDesc">Tell us about your role and experience in the operating room</p>
+                    </div>
+
+                    <form id="surveyForm">
+                        <div id="questionsContainer"></div>
+
+                        <div class="navigation">
+                            <button type="button" class="btn btn--secondary" id="prevBtn" onclick="previousSection()" disabled>Previous</button>
+                            <button type="button" class="btn btn--primary" id="nextBtn" onclick="nextSection()">Next</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin View -->
+        <div id="adminView" class="admin-view">
+            <div class="card">
+                <div class="card__body">
+                    <div class="admin-header">
+                        <div>
+                            <h2>Responses Dashboard</h2>
+                        </div>
+                        <button class="btn btn--primary" id="exportBtn" onclick="exportToCSV()">Export as CSV</button>
+                    </div>
+
+                    <div class="admin-stats">
+                        <div class="stat-card">
+                            <div class="stat-card__value" id="totalResponses">0</div>
+                            <div class="stat-card__label">Total Responses</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card__value" id="totalQuestions">23</div>
+                            <div class="stat-card__label">Questions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card__value" id="totalSections">6</div>
+                            <div class="stat-card__label">Sections</div>
+                        </div>
+                    </div>
+
+                    <div id="responsesContainer">
+                        <div class="empty-state">No responses yet. Start the survey to collect data.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const surveyData = {
+            sections: [
+                {
+                    id: 1,
+                    title: "Demographics",
+                    description: "Tell us about your role and experience in the operating room",
+                    questions: [
+                        { id: 1, type: "single_choice", question: "Your role in the Operation Room", options: ["Anesthesiologist", "Surgeon", "Nurse", "Technician/Paramedical Staff"] },
+                        { id: 2, type: "single_choice", question: "Years of experience in the Operation Theatre", options: ["<1 year", "1–5 years", "6–10 years", ">10 years"] },
+                        { id: 3, type: "single_choice", question: "Average number of surgeries you participate in per week", options: ["5-10", "11-20", "21-50", "More than 50"] }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "Awareness",
+                    description: "Your awareness and perception of sustainability in the OR",
+                    questions: [
+                        { id: 4, type: "single_choice", question: "How familiar are you with the concept of sustainability in the OR?", options: ["Passionate about it", "Very familiar", "Somewhat familiar", "Not familiar"] },
+                        { id: 5, type: "single_choice", question: "Do you think OR activities significantly contribute to hospital waste and carbon footprint?", options: ["Yes", "No", "Unsure"] },
+                        { id: 6, type: "multiple_choice", question: "Which of the following contribute most to environmental impact in the OR? (Select up to 3)", options: ["Single-use plastics", "Energy consumption (lights, HVAC)", "Anesthetic gases", "Water wastage", "Biomedical waste segregation practices", "Overuse of consumables (gowns, drapes, etc.)", "Don't know"], max_select: 3 }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: "Knowledge",
+                    description: "Your knowledge about sustainable practices in anesthesia and OR management",
+                    questions: [
+                        { id: 7, type: "multiple_choice", question: "Which anesthetic agents are considered high-impact greenhouse gases?", options: ["Desflurane", "Sevoflurane", "Nitrous Oxide", "Unsure"] },
+                        { id: 8, type: "single_choice", question: "Are you aware of low-flow anesthesia techniques to reduce volatile anesthetic use?", options: ["Yes, I routinely practice", "Yes, but I don't practice routinely", "I am aware of the term, but don't know the details", "Don't know", "Not sure"] },
+                        { id: 9, type: "single_choice", question: "In your OR, are recycling/segregation bins available and used effectively?", options: ["Yes, always", "Yes, but inconsistently", "No", "Don't know"] },
+                        { id: 10, type: "single_choice", question: "How often do you see single-use items discarded unopened/unused?", options: ["Frequently", "Occasionally", "Never", "Don't know"] }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: "Practices & Micro-habits",
+                    description: "Your current practices and micro-habits related to sustainability",
+                    questions: [
+                        { id: 11, type: "single_choice", question: "Do you make it a habit to turn off suction, cautery, or monitors when not in use?", options: ["Always", "Sometimes", "Never"] },
+                        { id: 12, type: "single_choice", question: "How often do you remind colleagues about avoiding unnecessary opening of supplies or switching off unused equipment?", options: ["Frequently", "Occasionally", "Never"] },
+                        { id: 13, type: "multiple_choice", question: "Which micro-habits are most feasible in your OR? (Select all that apply)", options: ["Turning off lights/monitors when not in use", "Using reusable gowns/drapes where possible", "Practicing low-flow anesthesia", "Segregating waste properly", "Avoiding unnecessary opening of consumables", "Encouraging digital over paper records", "Recycling packaging/plastics from supplies"] }
+                    ]
+                },
+                {
+                    id: 5,
+                    title: "Barriers",
+                    description: "Barriers and obstacles to sustainable practices in the OR",
+                    questions: [
+                        { id: 14, type: "multiple_choice", question: "What barriers prevent you from adopting sustainable OR practices? (Select all that apply)", options: ["Lack of awareness/training", "Institutional policy restrictions", "Concerns about infection control", "Lack of infrastructure (bins, reusables, etc.)", "Time pressure in OT", "No perceived benefit", "Hierarchy / reluctance of seniors", "Fear of breaking tradition/protocol"] },
+                        { id: 15, type: "single_choice", question: "Have you ever received formal training on sustainable OT practices (waste, energy, anesthetic gases)?", options: ["Yes, multiple times", "Yes, once", "No, never"] },
+                        { id: 16, type: "single_choice", question: "Would short periodic workshops help you adopt better sustainable practices in the OR?", options: ["Yes", "No", "Maybe"] }
+                    ]
+                },
+                {
+                    id: 6,
+                    title: "Perceptions & Suggestions",
+                    description: "Your perceptions, values, and suggestions for improvement",
+                    questions: [
+                        { id: 17, type: "single_choice", question: "How important should sustainability be as a quality metric in healthcare delivery?", options: ["Very important", "Moderately important", "Not important", "Don't know"] },
+                        { id: 18, type: "single_choice", question: "Do you think micro-habits in the OT can make a meaningful difference?", options: ["Yes, significant difference", "Yes, small difference", "No, negligible effect"] },
+                        { id: 19, type: "single_choice", question: "Do you feel your suggestions about sustainability are taken seriously by doctors/administration?", options: ["Yes, always", "Sometimes", "Never", "Does not apply"] },
+                        { id: 20, type: "single_choice", question: "If your hospital introduced a recognition program for 'Green OR Champions,' would it motivate you?", options: ["Yes", "No", "Maybe"] },
+                        { id: 21, type: "single_choice", question: "How important do you think it is that every level of OR staff has a voice in discussions on reducing waste and improving energy efficiency?", options: ["Very important", "Somewhat important", "Not important", "Don't know"] },
+                        { id: 22, type: "single_choice", question: "How important do you think it is to incorporate environment and sustainability related topics in the curriculum of healthcare education?", options: ["Very important", "Somewhat important", "Not important", "Don't know"] },
+                        { id: 23, type: "text", question: "Please share one suggestion from your daily experience that could make the OT more sustainable.", placeholder: "Enter your suggestion here..." }
+                    ]
+                }
+            ]
+        };
+
+        let currentSection = 0;
+        let responses = [];
+        let submittedResponses = [];
+
+        function initSurvey() {
+            responses = {};
+            surveyData.sections.forEach(section => {
+                responses[section.id] = {};
+                section.questions.forEach(q => {
+                    responses[section.id][q.id] = null;
+                });
+            });
+            renderSection();
+        }
+
+        function renderSection() {
+            const section = surveyData.sections[currentSection];
+            document.getElementById('sectionTitle').textContent = section.title;
+            document.getElementById('sectionDesc').textContent = section.description;
+            document.getElementById('sectionNum').textContent = currentSection + 1;
+
+            const progress = ((currentSection + 1) / surveyData.sections.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            document.getElementById('prevBtn').disabled = currentSection === 0;
+
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+
+            section.questions.forEach(q => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'form-group';
+
+                if (q.type === 'single_choice') {
+                    const label = document.createElement('div');
+                    label.className = 'question-text';
+                    label.textContent = q.question;
+                    groupDiv.appendChild(label);
+
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options-group';
+
+                    q.options.forEach(opt => {
+                        const optDiv = document.createElement('label');
+                        optDiv.className = 'radio-option';
+                        const input = document.createElement('input');
+                        input.type = 'radio';
+                        input.name = 'q' + q.id;
+                        input.value = opt;
+                        input.checked = responses[section.id][q.id] === opt;
+                        input.onchange = () => { responses[section.id][q.id] = opt; };
+                        optDiv.appendChild(input);
+                        optDiv.appendChild(document.createTextNode(opt));
+                        optionsDiv.appendChild(optDiv);
+                    });
+                    groupDiv.appendChild(optionsDiv);
+                } else if (q.type === 'multiple_choice') {
+                    const label = document.createElement('div');
+                    label.className = 'question-text';
+                    label.textContent = q.question;
+                    if (q.max_select) label.appendChild(document.createTextNode(` (max ${q.max_select})`));
+                    groupDiv.appendChild(label);
+
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options-group';
+
+                    if (!Array.isArray(responses[section.id][q.id])) {
+                        responses[section.id][q.id] = [];
+                    }
+
+                    q.options.forEach(opt => {
+                        const optDiv = document.createElement('label');
+                        optDiv.className = 'checkbox-option';
+                        const input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.name = 'q' + q.id;
+                        input.value = opt;
+                        input.checked = responses[section.id][q.id].includes(opt);
+                        input.onchange = () => {
+                            if (input.checked) {
+                                if (q.max_select && responses[section.id][q.id].length >= q.max_select) {
+                                    input.checked = false;
+                                    alert(`Maximum ${q.max_select} selections allowed.`);
+                                    return;
+                                }
+                                responses[section.id][q.id].push(opt);
+                            } else {
+                                responses[section.id][q.id] = responses[section.id][q.id].filter(v => v !== opt);
+                            }
+                        };
+                        optDiv.appendChild(input);
+                        optDiv.appendChild(document.createTextNode(opt));
+                        optionsDiv.appendChild(optDiv);
+                    });
+                    groupDiv.appendChild(optionsDiv);
+                } else if (q.type === 'text') {
+                    const label = document.createElement('div');
+                    label.className = 'question-text';
+                    label.textContent = q.question;
+                    groupDiv.appendChild(label);
+
+                    const textarea = document.createElement('textarea');
+                    textarea.placeholder = q.placeholder || '';
+                    textarea.value = responses[section.id][q.id] || '';
+                    textarea.onchange = () => { responses[section.id][q.id] = textarea.value; };
+                    textarea.oninput = () => { responses[section.id][q.id] = textarea.value; };
+                    groupDiv.appendChild(textarea);
+                }
+
+                container.appendChild(groupDiv);
+            });
+        }
+
+        function nextSection() {
+            const section = surveyData.sections[currentSection];
+            let hasError = false;
+
+            section.questions.forEach(q => {
+                if (q.type === 'multiple_choice' && !Array.isArray(responses[section.id][q.id])) {
+                    responses[section.id][q.id] = [];
+                }
+            });
+
+            if (currentSection < surveyData.sections.length - 1) {
+                currentSection++;
+                renderSection();
+            } else {
+                submitSurvey();
+            }
+        }
+
+        function previousSection() {
+            if (currentSection > 0) {
+                currentSection--;
+                renderSection();
+            }
+        }
+
+        function submitSurvey() {
+            const allResponses = {};
+            surveyData.sections.forEach(section => {
+                section.questions.forEach(q => {
+                    allResponses[q.id] = responses[section.id][q.id];
+                });
+            });
+
+            submittedResponses.push(allResponses);
+
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '<div class="thank-you"><h2>Thank You!</h2><p>Your survey response has been recorded. Your insights will help improve sustainability practices in the operating room.</p><button class="btn btn--primary" onclick="restartSurvey()">Start New Response</button></div>';
+
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'none';
+
+            updateAdmin();
+        }
+
+        function restartSurvey() {
+            currentSection = 0;
+            initSurvey();
+            document.getElementById('nextBtn').style.display = 'block';
+            document.getElementById('prevBtn').style.display = 'block';
+            renderSection();
+        }
+
+        function switchMode(mode) {
+            const surveyView = document.getElementById('surveyView');
+            const adminView = document.getElementById('adminView');
+            const surveyBtn = document.getElementById('surveyModeBtn');
+            const adminBtn = document.getElementById('adminModeBtn');
+
+            if (mode === 'survey') {
+                surveyView.classList.add('active');
+                adminView.classList.remove('active');
+                surveyBtn.className = 'btn btn--primary';
+                adminBtn.className = 'btn btn--secondary';
+            } else {
+                surveyView.classList.remove('active');
+                adminView.classList.add('active');
+                surveyBtn.className = 'btn btn--secondary';
+                adminBtn.className = 'btn btn--primary';
+                updateAdmin();
+            }
+        }
+
+        function updateAdmin() {
+            document.getElementById('totalResponses').textContent = submittedResponses.length;
+
+            const container = document.getElementById('responsesContainer');
+            if (submittedResponses.length === 0) {
+                container.innerHTML = '<div class="empty-state">No responses yet. Start the survey to collect data.</div>';
+                return;
+            }
+
+            let html = '<div class="table-wrapper"><table class="responses-table"><thead><tr><th>Response #</th>';
+
+            surveyData.sections.forEach(section => {
+                section.questions.forEach(q => {
+                    html += '<th>Q' + q.id + '</th>';
+                });
+            });
+
+            html += '</tr></thead><tbody>';
+
+            submittedResponses.forEach((resp, idx) => {
+                html += '<tr><td>' + (idx + 1) + '</td>';
+                surveyData.sections.forEach(section => {
+                    section.questions.forEach(q => {
+                        let val = resp[q.id];
+                        if (Array.isArray(val)) {
+                            val = val.join(', ');
+                        }
+                        html += '<td>' + (val || '—') + '</td>';
+                    });
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function exportToCSV() {
+            if (submittedResponses.length === 0) {
+                alert('No responses to export.');
+                return;
+            }
+
+            let csv = 'Response #';
+            surveyData.sections.forEach(section => {
+                section.questions.forEach(q => {
+                    csv += ',Q' + q.id + ': ' + q.question.substring(0, 30);
+                });
+            });
+            csv += '\n';
+
+            submittedResponses.forEach((resp, idx) => {
+                csv += (idx + 1);
+                surveyData.sections.forEach(section => {
+                    section.questions.forEach(q => {
+                        let val = resp[q.id];
+                        if (Array.isArray(val)) {
+                            val = '"' + val.join('; ') + '"';
+                        }
+                        csv += ',"' + (val || '') + '"';
+                    });
+                });
+                csv += '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'survey_responses_' + new Date().toISOString().split('T')[0] + '.csv';
+            a.click();
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initSurvey);
+    </script>
+</body>
+</html>
