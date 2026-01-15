@@ -146,14 +146,6 @@
             padding: 32px;
         }
 
-        .survey-view {
-            display: none;
-        }
-
-        .survey-view.active {
-            display: block;
-        }
-
         .progress-bar {
             height: 8px;
             background: var(--color-gray-200);
@@ -369,85 +361,6 @@
             margin-bottom: 32px;
         }
 
-        /* Admin Dashboard */
-        .admin-view {
-            display: none;
-        }
-
-        .admin-view.active {
-            display: block;
-        }
-
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .admin-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            padding: 16px;
-            text-align: center;
-        }
-
-        .stat-card__value {
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--color-primary);
-        }
-
-        .stat-card__label {
-            font-size: 12px;
-            color: var(--color-text-secondary);
-            margin-top: 4px;
-        }
-
-        .responses-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 24px;
-            font-size: 13px;
-        }
-
-        .responses-table th {
-            background: var(--color-gray-200);
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 2px solid var(--color-border);
-        }
-
-        .responses-table td {
-            padding: 12px;
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        .responses-table tr:hover {
-            background: rgba(33, 128, 141, 0.03);
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--color-text-secondary);
-        }
-
         .helper-text {
             font-size: 12px;
             color: var(--color-text-secondary);
@@ -532,13 +445,8 @@
             <p>Micro-habits and Practices in the Operating Room</p>
         </div>
 
-        <div class="mode-toggle">
-            <button class="btn btn--primary" id="surveyModeBtn" onclick="switchMode('survey')">Survey</button>
-            <button class="btn btn--secondary" id="adminModeBtn" onclick="switchMode('admin')">Admin Dashboard</button>
-        </div>
-
         <!-- Survey View -->
-        <div id="surveyView" class="survey-view active">
+        <div id="surveyView">
             <div class="card">
                 <div class="card__body">
                     <div class="progress-bar">
@@ -563,38 +471,6 @@
             </div>
         </div>
 
-        <!-- Admin View -->
-        <div id="adminView" class="admin-view">
-            <div class="card">
-                <div class="card__body">
-                    <div class="admin-header">
-                        <div>
-                            <h2>Responses Dashboard</h2>
-                        </div>
-                        <button class="btn btn--primary" id="exportBtn" onclick="exportToCSV()">Export as CSV</button>
-                    </div>
-
-                    <div class="admin-stats">
-                        <div class="stat-card">
-                            <div class="stat-card__value" id="totalResponses">0</div>
-                            <div class="stat-card__label">Total Responses</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card__value" id="totalQuestions">23</div>
-                            <div class="stat-card__label">Questions</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-card__value" id="totalSections">6</div>
-                            <div class="stat-card__label">Sections</div>
-                        </div>
-                    </div>
-
-                    <div id="responsesContainer">
-                        <div class="empty-state">No responses yet. Start the survey to collect data.</div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -670,7 +546,6 @@
 
         let currentSection = 0;
         let responses = [];
-        let submittedResponses = [];
         let consentSigned = false;
         let consentDetails = null;
 
@@ -729,11 +604,6 @@
             consentDetails = { name, date, agreedAt: new Date().toISOString() };
             consentError.style.display = 'none';
             closeConsentModal();
-        }
-
-        function formatConsent(consent) {
-            if (!consent || !consent.name) return 'Not recorded';
-            return `${consent.name} (${consent.date || 'no date'})`;
         }
 
         function renderSection() {
@@ -878,8 +748,6 @@
                 });
             });
 
-            submittedResponses.push({ ...allResponses, _consent: consentDetails });
-
             // Send to Google Sheets if URL is configured
             if (GOOGLE_SHEETS_URL) {
                 sendToGoogleSheets(allResponses);
@@ -890,8 +758,6 @@
 
             document.getElementById('nextBtn').style.display = 'none';
             document.getElementById('prevBtn').style.display = 'none';
-
-            updateAdmin();
         }
 
         function sendToGoogleSheets(data) {
@@ -937,101 +803,6 @@
             document.getElementById('nextBtn').style.display = 'block';
             document.getElementById('prevBtn').style.display = 'block';
             renderSection();
-        }
-
-        function switchMode(mode) {
-            const surveyView = document.getElementById('surveyView');
-            const adminView = document.getElementById('adminView');
-            const surveyBtn = document.getElementById('surveyModeBtn');
-            const adminBtn = document.getElementById('adminModeBtn');
-
-            if (mode === 'survey') {
-                surveyView.classList.add('active');
-                adminView.classList.remove('active');
-                surveyBtn.className = 'btn btn--primary';
-                adminBtn.className = 'btn btn--secondary';
-            } else {
-                surveyView.classList.remove('active');
-                adminView.classList.add('active');
-                surveyBtn.className = 'btn btn--secondary';
-                adminBtn.className = 'btn btn--primary';
-                updateAdmin();
-            }
-        }
-
-        function updateAdmin() {
-            document.getElementById('totalResponses').textContent = submittedResponses.length;
-
-            const container = document.getElementById('responsesContainer');
-            if (submittedResponses.length === 0) {
-                container.innerHTML = '<div class="empty-state">No responses yet. Start the survey to collect data.</div>';
-                return;
-            }
-
-            let html = '<div class="table-wrapper"><table class="responses-table"><thead><tr><th>Response #</th><th>Consent (name/date)</th>';
-
-            surveyData.sections.forEach(section => {
-                section.questions.forEach(q => {
-                    html += '<th>Q' + q.id + '</th>';
-                });
-            });
-
-            html += '</tr></thead><tbody>';
-
-            submittedResponses.forEach((resp, idx) => {
-                html += '<tr><td>' + (idx + 1) + '</td>';
-                html += '<td>' + formatConsent(resp._consent) + '</td>';
-                surveyData.sections.forEach(section => {
-                    section.questions.forEach(q => {
-                        let val = resp[q.id];
-                        if (Array.isArray(val)) {
-                            val = val.join(', ');
-                        }
-                        html += '<td>' + (val || '—') + '</td>';
-                    });
-                });
-                html += '</tr>';
-            });
-
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
-        }
-
-        function exportToCSV() {
-            if (submittedResponses.length === 0) {
-                alert('No responses to export.');
-                return;
-            }
-
-            let csv = 'Response #,Consent (name/date)';
-            surveyData.sections.forEach(section => {
-                section.questions.forEach(q => {
-                    csv += ',Q' + q.id + ': ' + q.question.substring(0, 30);
-                });
-            });
-            csv += '\n';
-
-            submittedResponses.forEach((resp, idx) => {
-                csv += (idx + 1);
-                csv += ',"' + formatConsent(resp._consent).replace(/"/g, '""') + '"';
-                surveyData.sections.forEach(section => {
-                    section.questions.forEach(q => {
-                        let val = resp[q.id];
-                        if (Array.isArray(val)) {
-                            val = '"' + val.join('; ') + '"';
-                        }
-                        csv += ',"' + (val || '') + '"';
-                    });
-                });
-                csv += '\n';
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'survey_responses_' + new Date().toISOString().split('T')[0] + '.csv';
-            a.click();
         }
 
         // Initialize on load
