@@ -233,6 +233,7 @@
         }
 
         input[type="text"],
+        input[type="date"],
         textarea {
             width: 100%;
             padding: 10px 12px;
@@ -253,6 +254,87 @@
         textarea {
             resize: vertical;
             min-height: 100px;
+        }
+
+        /* Consent modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(16, 24, 40, 0.55);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 999;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 720px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            box-shadow: 0 20px 45px rgba(16, 24, 40, 0.16);
+            overflow: hidden;
+        }
+
+        .modal__header {
+            padding: 20px 24px 12px 24px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal__body {
+            padding: 20px 24px;
+            max-height: 65vh;
+            overflow-y: auto;
+        }
+
+        .modal__body ul {
+            padding-left: 20px;
+            margin: 12px 0 0 0;
+        }
+
+        .modal__body li {
+            margin-bottom: 6px;
+        }
+
+        .modal__footer {
+            padding: 18px 24px;
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .consent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .modal__note {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 6px;
+        }
+
+        .modal__title {
+            font-size: 20px;
+            margin: 0 0 8px 0;
+        }
+
+        .modal__subtitle {
+            margin: 0;
+            color: var(--color-text-secondary);
+        }
+
+        .modal__error {
+            color: var(--color-red-400);
+            font-size: 13px;
+            display: none;
         }
 
         .navigation {
@@ -400,6 +482,50 @@
     </style>
 </head>
 <body>
+    <div id="consentModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="consentTitle">
+        <div class="modal">
+            <div class="modal__header">
+                <h2 id="consentTitle" class="modal__title">Consent to Participate</h2>
+                <p class="modal__subtitle">Please review and provide your signature to begin the survey.</p>
+            </div>
+            <div class="modal__body">
+                <p><strong>Purpose:</strong> This survey gathers insights about everyday micro-habits and practices that impact environmental sustainability in the operating room.</p>
+                <p>Participation is voluntary. You may stop at any time by closing this page. Responses are intended for research, quality-improvement, and educational use.</p>
+                <p>To document your consent, please provide your name or initials and confirm the statement below. This signature will be stored with your responses.</p>
+                <ul>
+                    <li>I have read and understood the information above.</li>
+                    <li>I am 18 years of age or older and work in/around an operating room.</li>
+                    <li>I voluntarily agree to participate and allow my responses (with the signature below) to be used for the purposes stated.</li>
+                </ul>
+
+                <div class="consent-grid">
+                    <div>
+                        <label class="form-label form-label--required" for="consentName">Signature (name or initials)</label>
+                        <input id="consentName" type="text" placeholder="Enter name or initials">
+                        <div class="modal__note">Stored with this survey response as proof of consent.</div>
+                    </div>
+                    <div>
+                        <label class="form-label form-label--required" for="consentDate">Date</label>
+                        <input id="consentDate" type="date">
+                        <div class="modal__note">Defaults to today; adjust if needed.</div>
+                    </div>
+                </div>
+
+                <div style="margin-top:14px;">
+                    <label class="checkbox-option" style="padding: 10px 12px;">
+                        <input type="checkbox" id="consentConfirm">
+                        <span>I confirm the above statements and agree to participate in this survey.</span>
+                    </label>
+                    <div id="consentError" class="modal__error">Please provide your signature, date, and agreement to continue.</div>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn--secondary" id="consentDeclineBtn">Decline</button>
+                <button type="button" class="btn btn--primary" id="consentAgreeBtn">Agree and start survey</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>OR Sustainability Survey</h1>
@@ -545,6 +671,8 @@
         let currentSection = 0;
         let responses = [];
         let submittedResponses = [];
+        let consentSigned = false;
+        let consentDetails = null;
 
         function initSurvey() {
             responses = {};
@@ -555,6 +683,57 @@
                 });
             });
             renderSection();
+            resetConsent();
+        }
+
+        function getTodayISO() {
+            const today = new Date();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${today.getFullYear()}-${month}-${day}`;
+        }
+
+        function resetConsent() {
+            consentSigned = false;
+            consentDetails = null;
+            if (consentNameInput) consentNameInput.value = '';
+            if (consentDateInput) consentDateInput.value = getTodayISO();
+            if (consentCheckbox) consentCheckbox.checked = false;
+            if (consentError) consentError.style.display = 'none';
+            openConsentModal();
+        }
+
+        function openConsentModal() {
+            if (!consentModal) return;
+            consentModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeConsentModal() {
+            if (!consentModal) return;
+            consentModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        function handleConsentAgree() {
+            const name = (consentNameInput.value || '').trim();
+            const date = consentDateInput.value || getTodayISO();
+            const confirmed = consentCheckbox.checked;
+
+            if (!name || !date || !confirmed) {
+                consentError.style.display = 'block';
+                return;
+            }
+
+            consentSigned = true;
+            consentDetails = { name, date, agreedAt: new Date().toISOString() };
+            consentError.style.display = 'none';
+            closeConsentModal();
+        }
+
+        function formatConsent(consent) {
+            if (!consent || !consent.name) return 'Not recorded';
+            return `${consent.name} (${consent.date || 'no date'})`;
         }
 
         function renderSection() {
@@ -656,6 +835,10 @@
         }
 
         function nextSection() {
+            if (!consentSigned) {
+                openConsentModal();
+                return;
+            }
             const section = surveyData.sections[currentSection];
             let hasError = false;
 
@@ -684,6 +867,10 @@
         const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyDOslaTLO_8ERd43X65H5qscJ2IVkwZOUek8EviNZxq0YPUh2g0U_Ah8D4Y78E8La9uA/exec';
 
         function submitSurvey() {
+            if (!consentSigned) {
+                openConsentModal();
+                return;
+            }
             const allResponses = {};
             surveyData.sections.forEach(section => {
                 section.questions.forEach(q => {
@@ -691,7 +878,7 @@
                 });
             });
 
-            submittedResponses.push(allResponses);
+            submittedResponses.push({ ...allResponses, _consent: consentDetails });
 
             // Send to Google Sheets if URL is configured
             if (GOOGLE_SHEETS_URL) {
@@ -711,6 +898,8 @@
             // Format data for Google Sheets
             const timestamp = new Date().toISOString();
             const rowData = [timestamp];
+            const consentSignature = consentDetails ? `${consentDetails.name} (${consentDetails.date || 'no date'})` : '';
+            rowData.push(consentSignature);
             
             // Add all question responses in order
             surveyData.sections.forEach(section => {
@@ -779,7 +968,7 @@
                 return;
             }
 
-            let html = '<div class="table-wrapper"><table class="responses-table"><thead><tr><th>Response #</th>';
+            let html = '<div class="table-wrapper"><table class="responses-table"><thead><tr><th>Response #</th><th>Consent (name/date)</th>';
 
             surveyData.sections.forEach(section => {
                 section.questions.forEach(q => {
@@ -791,6 +980,7 @@
 
             submittedResponses.forEach((resp, idx) => {
                 html += '<tr><td>' + (idx + 1) + '</td>';
+                html += '<td>' + formatConsent(resp._consent) + '</td>';
                 surveyData.sections.forEach(section => {
                     section.questions.forEach(q => {
                         let val = resp[q.id];
@@ -813,7 +1003,7 @@
                 return;
             }
 
-            let csv = 'Response #';
+            let csv = 'Response #,Consent (name/date)';
             surveyData.sections.forEach(section => {
                 section.questions.forEach(q => {
                     csv += ',Q' + q.id + ': ' + q.question.substring(0, 30);
@@ -823,6 +1013,7 @@
 
             submittedResponses.forEach((resp, idx) => {
                 csv += (idx + 1);
+                csv += ',"' + formatConsent(resp._consent).replace(/"/g, '""') + '"';
                 surveyData.sections.forEach(section => {
                     section.questions.forEach(q => {
                         let val = resp[q.id];
@@ -844,6 +1035,19 @@
         }
 
         // Initialize on load
+        const consentModal = document.getElementById('consentModal');
+        const consentNameInput = document.getElementById('consentName');
+        const consentDateInput = document.getElementById('consentDate');
+        const consentCheckbox = document.getElementById('consentConfirm');
+        const consentError = document.getElementById('consentError');
+        const consentAgreeBtn = document.getElementById('consentAgreeBtn');
+        const consentDeclineBtn = document.getElementById('consentDeclineBtn');
+
+        consentAgreeBtn.addEventListener('click', handleConsentAgree);
+        consentDeclineBtn.addEventListener('click', () => {
+            alert('You have declined consent. Close this page to exit the survey.');
+        });
+
         window.addEventListener('load', initSurvey);
     </script>
 </body>
